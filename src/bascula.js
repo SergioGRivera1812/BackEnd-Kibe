@@ -28,7 +28,6 @@ function iniciarBascula() {
 
     // Evento al recibir datos desde la báscula
     parser.on('data', (data) => {
-        console.log(`Peso recibido: ${data}`);
         // Emite los datos al front-end a través de socket.io
         io.emit('serial-data', data);
     });

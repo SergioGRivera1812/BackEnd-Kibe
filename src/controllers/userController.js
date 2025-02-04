@@ -1,4 +1,4 @@
-const UserModel = require('../models/user.model');  // Ajusta el path si es necesario
+const UserModel = require('../models/user.model');
 
 const UserController = {
     getAllUsers: async (req, res) => {
@@ -27,6 +27,7 @@ const UserController = {
             const result = await UserModel.createUser(req.body);
             res.status(201).json({ message: 'Usuario creado', userId: result.insertId });
         } catch (err) {
+            console.error('Error al crear el usuario:', err);  // Agregar log detallado
             res.status(500).json({ error: 'Error al crear el usuario' });
         }
     },
