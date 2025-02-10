@@ -23,8 +23,8 @@ const getUserById = async (id) => {
 // Crear un nuevo usuario
 const createUser = async (user) => {
   try {
-    const { name, email } = user; // Asegúrate de que los campos coincidan con los de tu base de datos
-    const result = await pool.execute('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
+    const { name, password,rol } = user; // Asegúrate de que los campos coincidan con los de tu base de datos
+    const result = await pool.execute('INSERT INTO users (nombre, password,rol) VALUES (?, ?,?)', [name, password,rol]);
     return result; // Devuelve el resultado de la inserción
   } catch (error) {
     throw new Error('Error al crear el usuario: ' + error.message);
@@ -34,8 +34,11 @@ const createUser = async (user) => {
 // Actualizar un usuario
 const updateUser = async (id, user) => {
   try {
-    const { name, email } = user;
-    const result = await pool.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+    const { nombre, password, rol } = user; // Cambio 'name' por 'nombre'
+    const result = await pool.execute(
+      'UPDATE users SET nombre = ?, password = ?, rol = ? WHERE id = ?', 
+      [nombre, password, rol, id]
+    );
     return result; // Devuelve el resultado de la actualización
   } catch (error) {
     throw new Error('Error al actualizar el usuario: ' + error.message);

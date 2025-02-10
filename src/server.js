@@ -1,6 +1,7 @@
 const express = require('express');
 const userRoutes = require('./routes/userRoutes');
 const bascula1Routes = require('./routes/bascula1Routes');
+const camionRoutes = require('./routes/camionRoutes');
 const cors = require('cors');
 const { iniciarBascula } = require('./bascula'); 
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(cors());
 app.use('/users', userRoutes);
 app.use('/bascula1', bascula1Routes);
+app.use('/camion', camionRoutes);
 
 iniciarBascula();
 app.listen(PORT, () => {
