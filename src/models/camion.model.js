@@ -32,7 +32,8 @@ const createBus = async (bus) => {
 const updateBus = async (id, bus) => {
   try {
     const { nombreChofer,apellidoChofer,unidad,tara,placas,origen,tag } = bus; 
-    const result = await pool.execute('UPDATE camiones SET nombreChofer = ?, apellidoChofer = ?,unidad = ?,tara = ?, placas = ?, origen = ?, tag = ? WHERE id = ?', [nombreChofer,apellidoChofer,placas,tara,unidad,origen,tag,id]);
+    const result = await pool.execute('UPDATE camiones SET nombreChofer = ?, apellidoChofer = ?,unidad = ?,tara = ?, placas = ?, origen = ?, tag = ? WHERE id = ?',[nombreChofer, apellidoChofer, unidad, tara, placas, origen, tag, id]
+    );
     return result;
   } catch (error) {
     throw new Error('Error al actualizar el unidad: ' + error.message);
