@@ -1,5 +1,4 @@
 require("dotenv").config();
-console.log("JWT_SECRET:", process.env.JWT_SECRET); // 🔍 Verificar que tenga valor
 
 const express = require("express");
 const cors = require("cors");
@@ -8,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bascula1Routes = require("./routes/bascula1Routes");
 const camionRoutes = require("./routes/camionRoutes");
+const printerRoutes = require("./routes/printerRoutes"); 
 
 const verifyToken = require("./auth/auth");
 const { iniciarBascula } = require("./bascula");
@@ -23,6 +23,7 @@ app.use("/auth", authRoutes);
 app.use("/users", verifyToken, userRoutes);
 app.use("/bascula1", verifyToken, bascula1Routes);
 app.use("/camion", verifyToken, camionRoutes);
+app.use("/print", printerRoutes);
 
 iniciarBascula();
 

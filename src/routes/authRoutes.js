@@ -29,7 +29,6 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     const { nombre, password } = req.body;
-    console.log("Datos recibidos en login:", req.body);
 
     try {
         if (!nombre || !password) {
@@ -46,8 +45,7 @@ router.post("/login", async (req, res) => {
         }
 
         const user = rows[0];
-        console.log("Password recibido:", password);
-        console.log("Password almacenado:", user.password);
+       
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
