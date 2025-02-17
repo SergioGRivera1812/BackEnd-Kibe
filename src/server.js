@@ -9,13 +9,14 @@ const bascula1Routes = require("./routes/bascula1Routes");
 const camionRoutes = require("./routes/camionRoutes");
 const printerRoutes = require("./routes/printerRoutes"); 
 
-const verifyToken = require("./auth/auth");
+const {verifyToken} = require("./auth/auth");
 const { iniciarBascula } = require("./bascula");
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Opcional pero recomendado
 app.use(cors());
 
 app.use("/auth", authRoutes);

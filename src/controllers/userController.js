@@ -76,20 +76,19 @@ const UserController = {
 
     updateUser: async (req, res) => {
         const { nombre, password, rol } = req.body;
-
-        if (!nombre || !password || !rol) {
-            return res.status(400).json({ error: 'Todos los campos son requeridos' });
+      
+        if (!nombre || !rol) {
+          return res.status(400).json({ error: 'El nombre y el rol son requeridos' });
         }
-
+      
         try {
-            const result = await UserModel.updateUser(req.params.id, req.body);
-            res.json({ message: 'Usuario actualizado' });
+          const result = await UserModel.updateUser(req.params.id, req.body);
+          res.json({ message: 'Usuario actualizado' });
         } catch (err) {
-            console.error('Error al actualizar el usuario:', err);
-            res.status(500).json({ error: 'Error al actualizar el usuario' });
+          console.error('Error al actualizar el usuario:', err);
+          res.status(500).json({ error: 'Error al actualizar el usuario' });
         }
-    },
-
+      },
     deleteUser: async (req, res) => {
         try {
             const result = await UserModel.deleteUser(req.params.id);
