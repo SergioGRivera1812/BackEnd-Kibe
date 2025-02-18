@@ -7,8 +7,6 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({ error: 'Error en la autenticación: headers no encontrados' });
     }
 
-    console.log('Headers en la petición:', req.headers);
-
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         console.error('Error: No se proporcionó un token');
@@ -23,7 +21,6 @@ const verifyToken = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, secretKey);
-        console.log('Token decodificado:', decoded);
         req.user = decoded;
         next();
     } catch (error) {

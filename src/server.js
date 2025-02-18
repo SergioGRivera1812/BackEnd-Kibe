@@ -11,6 +11,7 @@ const printerRoutes = require("./routes/printerRoutes");
 
 const {verifyToken} = require("./auth/auth");
 const { iniciarBascula } = require("./bascula");
+const { iniciarPLC } = require("./plc");
 
 const app = express();
 const PORT = 3000;
@@ -27,6 +28,7 @@ app.use("/camion", verifyToken, camionRoutes);
 app.use("/print", printerRoutes);
 
 iniciarBascula();
+iniciarPLC();
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
