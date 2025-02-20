@@ -27,7 +27,7 @@ const UserController = {
     },
 
     registerUser: async (req, res) => {
-        const { name, password, rol } = req.body;
+        const { name, password, rol, bascula } = req.body;
 
         if (!name || !password || !rol) {
             return res.status(400).json({ error: 'Todos los campos son requeridos' });
@@ -35,7 +35,7 @@ const UserController = {
 
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const result = await UserModel.createUser({ name, password: hashedPassword, rol });
+            const result = await UserModel.createUser({ name, password: hashedPassword, rol,bascula });
 
 
             const token = jwt.generateToken(result.insertId, rol);

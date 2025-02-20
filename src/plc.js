@@ -3,9 +3,9 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 function iniciarPLC() {
-    const portName = 'COM1'; // Cambia según tu configuración
+    const portName = 'COM1';
     const baudRate = 9600;
-    let keepSending = true; // Control de envío en streaming
+    let keepSending = true; 
 
     // Configuración del servidor HTTP y socket.io
     const server = http.createServer();
@@ -39,7 +39,7 @@ function iniciarPLC() {
 
     // Comunicación con clientes WebSocket
     io.on('connection', (socket) => {
-        console.log('Cliente conectado');
+        console.log('Cliente plc conectado');
 
         // Recibir datos desde el cliente y enviarlos al PLC
         socket.on('send-data', (data) => {
@@ -78,7 +78,7 @@ function iniciarPLC() {
     // Iniciar el servidor
     const PORT = 4001;
     server.listen(PORT, () => {
-        console.log(`Servidor corriendo en http://localhost:${PORT}`);
+        console.log(`PLC corriendo en http://localhost:${PORT}`);
     });
 }
 

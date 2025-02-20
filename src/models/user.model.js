@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const getAllUsers = async () => {
   try {
-    const [rows] = await pool.execute('SELECT id, nombre, rol FROM users');
+    const [rows] = await pool.execute('SELECT id, nombre, rol, bascula FROM users');
     return rows;
   } catch (error) {
     throw new Error('Error al obtener los usuarios: ' + error.message);
@@ -31,19 +31,18 @@ const createUser = async (user) => {
 
 const updateUser = async (id, user) => {
   try {
-    const { nombre, password, rol } = user;
+    const { nombre, password, rol,bascula } = user;
 
     let hashedPassword = password;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
     } else {
-      // Si no se proporciona contraseña, no se cambia la contraseña en la base de datos
-      hashedPassword = null; // O puedes mantener el valor original
+      hashedPassword = null; 
     }
 
     const result = await pool.execute(
-      'UPDATE users SET nombre = ?, password = COALESCE(?, password), rol = ? WHERE id = ?', 
-      [nombre, hashedPassword, rol, id]
+      'UPDATE users SET nombre = ?, password = COALESCE(?, password), rol = ?, bascula = ? WHERE id = ?', 
+      [nombre, hashedPassword, rol, bascula,id]
     );
     
     return result;

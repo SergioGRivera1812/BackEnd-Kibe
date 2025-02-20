@@ -1,51 +1,126 @@
 const { SerialPort, ReadlineParser } = require('serialport');
 const http = require('http');
 const socketIo = require('socket.io');
+const os = require('os');
 
-function iniciarBascula() {
+function iniciarBascula1() {
     const portName = 'COM1';
     const baudRate = 9600;
+    const PORT = 4000;  // Puerto del servidor
+    const HOST = '0.0.0.0'; // Permite conexiones desde cualquier IP
 
-    // Configuración del servidor HTTP y socket.io
+    // Crear servidor HTTP
     const server = http.createServer();
+
+    // Inicializar Socket.IO con CORS habilitado
     const io = socketIo(server, {
         cors: {
-            origin: '*', // Cambia esto para restringir el acceso en producción
-        },
+            origin: "http://192.168.1.16:4200", // IP del frontend en la red
+            methods: ["GET", "POST"]
+        }
     });
 
-    // Configuración del puerto serie
+    // Detectar IP local para mostrar la dirección correcta
+    const localIP = getLocalIP();
+
+    // Configurar el puerto serie
     const port = new SerialPort({ path: portName, baudRate: baudRate }, (err) => {
         if (err) {
-            console.error(`Error al abrir el puerto: ${err.message}`);
+            console.error(`❌ Error al abrir el puerto ${portName}: ${err.message}`);
             return;
         }
-        console.log(`Puerto ${portName} abierto con baudRate ${baudRate}`);
+        console.log(`✅ Báscula en línea en puerto ${portName} con baudRate ${baudRate}`);
     });
 
-    // Parser para interpretar los datos recibidos
+    // Parser para leer datos del puerto serie
     const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-    // Evento al recibir datos desde la báscula
+    // Evento cuando recibe datos de la báscula
     parser.on('data', (data) => {
-        // Emite los datos al front-end a través de socket.io
-        io.emit('serial-data', data);
+        io.emit('serial-data', data);  // Enviar datos a los clientes vía WebSocket
+        // console.log(`✅ Datos recibidos de la báscula: ${data}`);
     });
 
-    // Manejo de errores del puerto
+    // Manejo de errores del puerto serie
     port.on('error', (err) => {
-        console.error(`Error del puerto: ${err.message}`);
+        console.error(`❌ Error del puerto: ${err.message}`);
     });
 
     // Evento cuando el puerto se cierra
     port.on('close', () => {
-        console.log(`Puerto ${portName} cerrado`);
+        console.warn(`⚠️ Puerto ${portName} cerrado`);
     });
 
-    // Inicia el servidor HTTP y socket.io
-    const PORT = 4000; // Cambia el puerto si es necesario
-    server.listen(PORT, () => {
-        console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    // Iniciar servidor HTTP y WebSockets
+    server.listen(PORT, HOST, () => {
+        console.log(`🚀 Servidor corriendo en http://${localIP}:${PORT}`);
     });
 }
-module.exports = {iniciarBascula};
+function iniciarBascula2() {
+    const portName = 'COM9';
+    const baudRate = 9600;
+    const PORT = 4002;  // Puerto del servidor
+    const HOST = '0.0.0.0'; // Permite conexiones desde cualquier IP
+
+    // Crear servidor HTTP
+    const server = http.createServer();
+
+    // Inicializar Socket.IO con CORS habilitado
+    const io = socketIo(server, {
+        cors: {
+            origin: "http://192.168.1.16:4200", // IP del frontend en la red
+            methods: ["GET", "POST"]
+        }
+    });
+
+    // Detectar IP local para mostrar la dirección correcta
+    const localIP = getLocalIP();
+
+    // Configurar el puerto serie
+    const port = new SerialPort({ path: portName, baudRate: baudRate }, (err) => {
+        if (err) {
+            console.error(`❌ Error al abrir el puerto ${portName}: ${err.message}`);
+            return;
+        }
+        console.log(`✅ Báscula en línea en puerto ${portName} con baudRate ${baudRate}`);
+    });
+
+    // Parser para leer datos del puerto serie
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+
+    // Evento cuando recibe datos de la báscula
+    parser.on('data', (data) => {
+        io.emit('serial-data', data);  // Enviar datos a los clientes vía WebSocket
+    });
+
+    // Manejo de errores del puerto serie
+    port.on('error', (err) => {
+        console.error(`❌ Error del puerto: ${err.message}`);
+    });
+
+    // Evento cuando el puerto se cierra
+    port.on('close', () => {
+        console.warn(`⚠️ Puerto ${portName} cerrado`);
+    });
+
+    // Iniciar servidor HTTP y WebSockets
+    server.listen(PORT, HOST, () => {
+        console.log(`🚀 Servidor corriendo en http://${localIP}:${PORT}`);
+    });
+}
+
+
+// Función para obtener la IP local en la red
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+    for (const key in interfaces) {
+        for (const net of interfaces[key]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+    return 'localhost';
+}
+
+module.exports = { iniciarBascula1, iniciarBascula2 };
