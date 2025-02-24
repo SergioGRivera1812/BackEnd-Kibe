@@ -1,85 +1,72 @@
 const { SerialPort } = require('serialport');
-const http = require('http');
-const socketIo = require('socket.io');
+const { ReadlineParser } = require('@serialport/parser-readline');
+const io = require('socket.io')(4001, {
+    cors: { origin: '*' }
+});
+
+let port;
+let keepStreaming = false;
+let intervalId = null;
 
 function iniciarPLC() {
-    const portName = 'COM1';
-    const baudRate = 9600;
-    let keepSending = true; 
+    // Inicializar el puerto serie
+    port = new SerialPort({ path: 'COM3', baudRate: 9600 });
 
-    // Configuración del servidor HTTP y socket.io
-    const server = http.createServer();
-    const io = socketIo(server, {
-        cors: {
-            origin: '*', // Ajusta en producción
-        },
+    // Crear un parser para leer los datos del PLC
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+
+    // Manejo de datos recibidos
+    parser.on('data', (data) => {
+        console.log(`Datos recibidos del PLC: ${data}`);
+        io.emit('serial-data', data);
     });
 
-    // Configuración del puerto serie
-    const port = new SerialPort({ path: portName, baudRate: baudRate }, (err) => {
-        if (err) {
-            console.error(`Error al abrir el puerto: ${err.message}`);
-            return;
-        }
-        console.log(`Puerto ${portName} abierto con baudRate ${baudRate}`);
+    // Manejo de errores en la comunicación serial
+    port.on('error', (err) => {
+        console.error('Error en el puerto serie:', err.message);
     });
 
-    // Función para enviar 0000000 en stream
-    function startStreaming() {
-        if (!keepSending) return;
-        const message = "0000000\r\n"; // Ajusta según requiera el PLC
-        port.write(message, (err) => {
-            if (err) console.error('Error al enviar stream:', err.message);
-        });
-        setTimeout(startStreaming, 200); // Envía cada segundo (ajústalo según necesidades)
-    }
+    console.log("PLC iniciado y escuchando en COM3");
 
-    // Iniciar el envío continuo
-    startStreaming();
-
-    // Comunicación con clientes WebSocket
+    // WebSocket para iniciar y detener el streaming
     io.on('connection', (socket) => {
-        console.log('Cliente plc conectado');
+        console.log('Cliente conectado');
 
-        // Recibir datos desde el cliente y enviarlos al PLC
-        socket.on('send-data', (data) => {
-            if (typeof data === 'string' && data.match(/^\d{7}$/)) {
-                const message = `${data}\r\n`;
-                port.write(message, (err) => {
-                    if (err) {
-                        console.error('Error al enviar datos:', err.message);
-                        socket.emit('serial-error', err.message);
-                    } else {
-                        console.log(`Datos enviados al PLC: ${message}`);
-                        socket.emit('serial-success', `Datos enviados: ${data}`);
-                    }
-                });
-            } else {
-                console.warn('Formato incorrecto:', data);
-                socket.emit('serial-error', 'Formato incorrecto (se espera 4 dígitos numéricos)');
-            }
+        socket.on('start-streaming', (data) => {
+            console.log('Iniciando streaming con:', data);
+            startStreaming(data);
+        });
+
+        socket.on('stop-streaming', () => {
+            console.log('Deteniendo streaming');
+            stopStreaming();
         });
 
         socket.on('disconnect', () => {
             console.log('Cliente desconectado');
+            stopStreaming();
         });
     });
+}
 
-    // Manejo de errores del puerto serie
-    port.on('error', (err) => {
-        console.error(`Error del puerto: ${err.message}`);
-    });
+// Función para enviar datos al PLC periódicamente
+function startStreaming(message) {
+    if (keepStreaming) return;
+    keepStreaming = true;
 
-    // Evento cuando se cierra el puerto
-    port.on('close', () => {
-        console.log(`Puerto ${portName} cerrado`);
-    });
+    intervalId = setInterval(() => {
+        port.write(message + '\r\n', (err) => {
+            if (err) console.error('Error al enviar stream:', err.message);
+        });
+        console.log('Enviando:', message);
+    }, 200);
+}
 
-    // Iniciar el servidor
-    const PORT = 4001;
-    server.listen(PORT, () => {
-        console.log(`PLC corriendo en http://localhost:${PORT}`);
-    });
+// Función para detener el streaming
+function stopStreaming() {
+    keepStreaming = false;
+    if (intervalId) clearInterval(intervalId);
+    console.log('Streaming detenido');
 }
 
 module.exports = { iniciarPLC };

@@ -1,5 +1,12 @@
-const printerPort = require('../config/serialConfigPrinter');
 const PrintData = require('../models/printer.model');
+const { SerialPort } = require('serialport');
+
+const printerPort = new SerialPort({ path: 'COM5', baudRate: 9600 }, (err) => {
+    if (err) {
+        console.error(`Error al abrir el puerto: ${err.message}`);
+        return;
+    }
+});
 
 const printEntrada = (data) => {
     const centerCommand = '\x1B\x61\x01'; // Centrar texto

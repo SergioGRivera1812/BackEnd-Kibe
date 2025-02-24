@@ -9,5 +9,7 @@ router.post('/', bascula1Controller.createRegistro);
 router.put('/:idCamion', bascula1Controller.updateRegistro);
 router.delete('/:id', bascula1Controller.deleteRegistro);
 router.get('/tara/:idCamion', bascula1Controller.getTaraByIdCamion);
+router.get('/registro', bascula1Controller.getRegistroByIdOrUsername);
+
 
 module.exports = router;

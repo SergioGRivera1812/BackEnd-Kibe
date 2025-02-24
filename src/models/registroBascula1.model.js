@@ -17,6 +17,14 @@ const getRegistroById = async (id) => {
         throw new Error('Error al obtener el registro: ' + error.message);
     }
 };
+const getRegistroByUsuario = async (usuario) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM bascula1 WHERE conductor = ?', [usuario]);
+        return rows[0];
+    } catch (error) {
+        throw new Error('Error al obtener el registro por usuario: ' + error.message);
+    }
+};
 
 const createRegistro = async (registro) => {
     try {
@@ -69,4 +77,4 @@ const getTaraByIdCamion = async (idCamion) => {
         throw new Error('Error al obtener el valor de tara: ' + error.message);
     }
 };
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion };
+module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,getRegistroByUsuario };

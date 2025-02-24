@@ -1,7 +1,7 @@
 const { SerialPort } = require('serialport');
 
 const portName = 'COM5'; // Cambia según tu puerto
-const portName2 = 'COM7'; // Cambia según tu puerto
+const portName2 = 'COM6'; // Cambia según tu puerto
 const baudRate = 9600;
 
 const printerPort = new SerialPort({ path: portName, baudRate: baudRate }, (err) => {

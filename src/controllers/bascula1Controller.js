@@ -59,6 +59,32 @@ const bascula1Controller = {
         } catch (error) {        
             res.status(500).json({ error: 'Error al eliminar el registro de la bascula 1' });
         }
+    },
+    getRegistroByIdOrUsername: async (req, res) => {
+        try {
+            const { id, usuario } = req.query; // Usamos query para id o nombre de usuario
+
+            if (id) {
+                // Si se proporciona el id, buscamos por id
+                const registro = await bascula1Model.getRegistroById(id);
+                if (!registro) {
+                    return res.status(404).json({ error: 'Registro no encontrado' });
+                }
+                return res.json(registro);
+            } else if (usuario) {
+                // Si se proporciona el usuario, buscamos por nombre de usuario
+                const registro = await bascula1Model.getRegistroByUsuario(usuario);
+                if (!registro) {
+                    return res.status(404).json({ error: 'Usuario no encontrado' });
+                }
+                return res.json(registro);
+            } else {
+                return res.status(400).json({ error: 'Debe proporcionar un id o nombre de usuario' });
+            }
+
+        } catch (error) {
+            res.status(500).json({ error: 'Error al obtener el registro', details: error.message });
+        }
     }
 };
 

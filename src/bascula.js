@@ -15,7 +15,7 @@ function iniciarBascula1() {
     // Inicializar Socket.IO con CORS habilitado
     const io = socketIo(server, {
         cors: {
-            origin: "http://192.168.1.16:4200", // IP del frontend en la red
+            origin: "http://192.168.1.77:4200", // IP del frontend en la red
             methods: ["GET", "POST"]
         }
     });
@@ -38,7 +38,7 @@ function iniciarBascula1() {
     // Evento cuando recibe datos de la báscula
     parser.on('data', (data) => {
         io.emit('serial-data', data);  // Enviar datos a los clientes vía WebSocket
-        // console.log(`✅ Datos recibidos de la báscula: ${data}`);
+        //console.log(`✅ Datos recibidos de la báscula: ${data}`);
     });
 
     // Manejo de errores del puerto serie
@@ -57,7 +57,7 @@ function iniciarBascula1() {
     });
 }
 function iniciarBascula2() {
-    const portName = 'COM9';
+    const portName = 'COM2';
     const baudRate = 9600;
     const PORT = 4002;  // Puerto del servidor
     const HOST = '0.0.0.0'; // Permite conexiones desde cualquier IP
@@ -68,7 +68,7 @@ function iniciarBascula2() {
     // Inicializar Socket.IO con CORS habilitado
     const io = socketIo(server, {
         cors: {
-            origin: "http://192.168.1.16:4200", // IP del frontend en la red
+            origin: "http://192.168.1.77:4200", // IP del frontend en la red
             methods: ["GET", "POST"]
         }
     });
