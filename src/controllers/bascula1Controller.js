@@ -33,15 +33,47 @@ const bascula1Controller = {
 
     updateRegistro: async (req, res) => {
         try {
-            const { bruto, neto, fechaS, horaS,activo } = req.body;
-            const idCamion = req.params.idCamion; 
-
-            const result = await bascula1Model.updateRegistro(idCamion, bruto, neto, fechaS, horaS,activo);
+            const { bruto, neto, fechaS, horaS, Entro, Salio, activo } = req.body;
+            const idCamion = req.params.idCamion;
+    
+            if (!idCamion) {
+                return res.status(400).json({ error: 'ID del camión no proporcionado' });
+            }
+    
+            // Validamos si algún valor es undefined y lo convertimos a null
+            const safeValues = {
+                bruto: bruto !== undefined ? bruto : null,
+                neto: neto !== undefined ? neto : null,
+                fechaS: fechaS !== undefined ? fechaS : null,
+                horaS: horaS !== undefined ? horaS : null,
+                Salio: Salio !== undefined ? Salio : null,
+                activo: activo !== undefined ? activo : null,
+            };
+    
+           
+    
+            const result = await bascula1Model.updateRegistro(
+                idCamion,
+                safeValues.bruto,
+                safeValues.neto,
+                safeValues.fechaS,
+                safeValues.horaS,
+                safeValues.Salio,
+                safeValues.activo
+            );
+    
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'No se encontró el camión para actualizar' });
+            }
+    
             res.status(200).json({ message: 'Registro actualizado', result: result.affectedRows });
         } catch (error) {
-            res.status(500).json({ error: 'Error al actualizar el registro de la bascula 1' });
+            console.error('Error en updateRegistro:', error.message);
+            res.status(500).json({ error: 'Error al actualizar el registro de la bascula 1', details: error.message });
         }
     },
+    
+    
     getTaraByIdCamion: async (req, res) => {
         try {
             const idCamion = req.params.idCamion;

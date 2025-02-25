@@ -28,12 +28,12 @@ const getRegistroByUsuario = async (usuario) => {
 
 const createRegistro = async (registro) => {
     try {
-        const { idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, activo } = registro;
+        const { idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio, activo } = registro;
 
         const [result] = await pool.execute(
-            `INSERT INTO bascula1 (idCamion,placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,activo) 
-             VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, activo]
+            `INSERT INTO bascula1 (idCamion,placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio,activo) 
+             VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
+            [idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio, activo]
         );
 
         return result;
@@ -42,19 +42,41 @@ const createRegistro = async (registro) => {
     }
 };
 
-const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, activo) => {
+const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activo) => {
     try {
-        const [result] = await pool.execute(
-            `UPDATE bascula1 
-            SET bruto = ?, neto = ?, fechaS = ?, horaS = ?, activo = ?
-            WHERE idCamion = ?`, 
-            [bruto, neto, fechaS, horaS, activo, idCamion]
+        // Determinar en qué tabla está registrado el camión
+        const [rows] = await pool.execute(
+            `SELECT 'bascula1' AS tabla FROM bascula1 WHERE idCamion = ?
+             UNION ALL
+             SELECT 'bascula2' AS tabla FROM bascula2 WHERE idCamion = ?
+             LIMIT 1`, 
+            [idCamion, idCamion]
         );
-        return result;
+
+        if (rows.length === 0) {
+            throw new Error('Camión no encontrado en ninguna báscula');
+        }
+
+        const tabla = rows[0].tabla; // Obtener la tabla correspondiente
+
+        // Ejecutar el UPDATE en la tabla correcta
+        const [result] = await pool.execute(
+            `UPDATE ${tabla} 
+            SET bruto = ?, neto = ?, fechaS = ?, horaS = ?, salio = ?, activo = ?
+            WHERE idCamion = ?`, 
+            [bruto, neto, fechaS, horaS, salio, activo, idCamion]
+        );
+
+        if (result.affectedRows === 0) {
+            throw new Error(`No se pudo actualizar el registro en ${tabla}`);
+        }
+
+        return `Registro actualizado correctamente en ${tabla}`;
     } catch (error) {
         throw new Error('Error al actualizar el registro: ' + error.message);
     }
 };
+
 
 const deleteRegistro = async (id) => {
     try {
@@ -67,14 +89,25 @@ const deleteRegistro = async (id) => {
 
 const getTaraByIdCamion = async (idCamion) => {
     try {
-        const [rows] = await pool.execute('SELECT tara FROM bascula1 WHERE idCamion = ?', [idCamion]);
+        const [rows] = await pool.execute(
+            `SELECT tara 
+             FROM (
+                 SELECT tara FROM bascula1 WHERE idCamion = ?
+                 UNION ALL
+                 SELECT tara FROM bascula2 WHERE idCamion = ?
+             ) AS combined
+             LIMIT 1`, 
+            [idCamion, idCamion]
+        );
+
         if (rows.length > 0) {
             return rows[0].tara;
         } else {
-            throw new Error('Camión no encontrado');
+            throw new Error('Camión no encontrado en ninguna báscula');
         }
     } catch (error) {
         throw new Error('Error al obtener el valor de tara: ' + error.message);
     }
 };
+
 module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,getRegistroByUsuario };
