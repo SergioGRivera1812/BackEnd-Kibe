@@ -81,13 +81,15 @@ const deleteRegistro = async (id) => {
 const getTaraByIdCamion = async (idCamion) => {
     try {
         const [rows] = await pool.execute(
-            `SELECT tara 
-             FROM (
-                 SELECT tara FROM bascula1 WHERE idCamion = ?
-                 UNION ALL
-                 SELECT tara FROM bascula2 WHERE idCamion = ?
-             ) AS combined
-             LIMIT 1`, 
+            `SELECT tara
+            FROM (
+                SELECT tara, id FROM bascula1 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+                UNION ALL
+                SELECT tara, id FROM bascula2 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+            ) AS combined
+            ORDER BY id DESC
+            LIMIT 1;
+                `, 
             [idCamion, idCamion]
         );
 

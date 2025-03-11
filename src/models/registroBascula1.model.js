@@ -28,12 +28,12 @@ const getRegistroByUsuario = async (usuario) => {
 
 const createRegistro = async (registro) => {
     try {
-        const { idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio, activo } = registro;
+        const { idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, Entro, Salio, activo } = registro;
 
         const [result] = await pool.execute(
             `INSERT INTO bascula1 (idCamion,placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio,activo) 
              VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
-            [idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio, activo]
+            [idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, Entro, Salio, activo]
         );
 
         return result;
@@ -49,7 +49,7 @@ const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activ
             `SELECT 'bascula1' AS tabla FROM bascula1 WHERE idCamion = ?
              UNION ALL
              SELECT 'bascula2' AS tabla FROM bascula2 WHERE idCamion = ?
-             LIMIT 1`, 
+             LIMIT 1`,
             [idCamion, idCamion]
         );
 
@@ -63,7 +63,7 @@ const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activ
         const [result] = await pool.execute(
             `UPDATE ${tabla} 
             SET bruto = ?, neto = ?, fechaS = ?, horaS = ?, salio = ?, activo = ?
-            WHERE idCamion = ?`, 
+            WHERE idCamion = ?`,
             [bruto, neto, fechaS, horaS, salio, activo, idCamion]
         );
 
@@ -90,15 +90,19 @@ const deleteRegistro = async (id) => {
 const getTaraByIdCamion = async (idCamion) => {
     try {
         const [rows] = await pool.execute(
-            `SELECT tara 
-             FROM (
-                 SELECT tara FROM bascula1 WHERE idCamion = ?
-                 UNION ALL
-                 SELECT tara FROM bascula2 WHERE idCamion = ?
-             ) AS combined
-             LIMIT 1`, 
+            `SELECT tara
+            FROM (
+                SELECT tara, id FROM bascula1 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+                UNION ALL
+                SELECT tara, id FROM bascula2 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+            ) AS combined
+            ORDER BY id DESC
+            LIMIT 1;
+                `,  
             [idCamion, idCamion]
         );
+        console.log(rows); // Añadir para verificar los resultados
+
 
         if (rows.length > 0) {
             return rows[0].tara;
@@ -110,4 +114,4 @@ const getTaraByIdCamion = async (idCamion) => {
     }
 };
 
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,getRegistroByUsuario };
+module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro, getTaraByIdCamion, getRegistroByUsuario };

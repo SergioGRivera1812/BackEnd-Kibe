@@ -45,6 +45,17 @@ const CamionController = {
             res.status(500).json({ error: 'Error al eliminar la unidad' });
         }
     },
+    getBusByTag: async (req, res) => {
+        try {
+            const bus = await CamionModel.getBusByTag(req.params.tag);
+            if (!bus) {
+                return res.status(404).json({ error: 'Unidad no encontrada con ese tag' });
+            }
+            res.json(bus);
+        } catch (err) {
+            res.status(500).json({ error: 'Error al obtener la unidad por tag' });
+        }
+    }
 };
 
 module.exports = CamionController;

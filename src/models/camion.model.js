@@ -49,11 +49,20 @@ const deleteBus = async (id) => {
     throw new Error('Error al eliminar el usuario: ' + error.message);
   }
 };
+const getBusByTag = async (tag) => {
+  try {
+    const [rows] = await pool.execute('SELECT * FROM camiones WHERE tag = ?', [tag]);
+    return rows[0]; 
+  } catch (error) {
+    throw new Error('Error al obtener la unidad por tag: ' + error.message);
+  }
+};
 
 module.exports = {
   getAllBus,
   getBusById,
   createBus,
   updateBus,
-  deleteBus
+  deleteBus,
+  getBusByTag
 };
