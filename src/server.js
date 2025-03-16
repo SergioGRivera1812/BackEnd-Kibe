@@ -21,7 +21,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Opcional pero recomendado
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/auth", authRoutes);
@@ -36,7 +36,7 @@ app.use("/producto", verifyToken, productoRoutes);
 
 iniciarBascula1();
 iniciarBascula2();
-iniciarPLC();
+// iniciarPLC();
 
 app.listen(PORT,'0.0.0.0', () => {
     console.log(`Servidor corriendo en :${PORT}`);
