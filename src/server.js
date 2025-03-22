@@ -10,6 +10,7 @@ const bascula2Routes = require("./routes/bascula2Routes");
 const camionRoutes = require("./routes/camionRoutes");
 const printerRoutes = require("./routes/printerRoutes"); 
 const productoRoutes = require("./routes/productoRoutes");
+const clienteRoutes = require("./routes/clienteRoutes");
 const printer2Routes = require("./routes/printer2Routes");
 const {verifyToken} = require("./auth/auth");
 const { iniciarBascula1 } = require("./bascula");
@@ -33,6 +34,8 @@ app.use("/camion", verifyToken, camionRoutes);
 app.use("/print", printerRoutes);
 app.use("/print2", printer2Routes);
 app.use("/producto", verifyToken, productoRoutes);
+app.use("/cliente", verifyToken, clienteRoutes);
+
 
 iniciarBascula1();
 iniciarBascula2();
