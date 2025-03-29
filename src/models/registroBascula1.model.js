@@ -17,6 +17,21 @@ const getRegistroById = async (id) => {
         throw new Error('Error al obtener el registro: ' + error.message);
     }
 };
+const getRegistroByIdCamion = async (idCamion) => {
+    try {
+        // Suponiendo que 'id' es un campo autoincremental que indica el orden de registro
+        const [rows] = await pool.execute(
+            'SELECT * FROM bascula1 WHERE idCamion = ? ORDER BY id DESC LIMIT 1',
+            [idCamion]
+        );
+        if (rows.length === 0) {
+            return null; // Si no hay registros, retornamos null
+        }
+        return rows[0]; // Retornamos solo el primer registro (el más reciente)
+    } catch (error) {
+        throw new Error('Error al ejecutar la consulta SQL: ' + error.message);
+    }
+};
 const getRegistroByUsuario = async (usuario) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM bascula1 WHERE conductor = ?', [usuario]);
@@ -129,4 +144,13 @@ const RegistrarAperturarB1 = async () => {
         throw new Error('Error al crear el registro: ' + error.message);
     }
 }
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro, getTaraByIdCamion, getRegistroByUsuario, RegistrarAperturarB1 };
+module.exports = { 
+    getAllRegistros, 
+    getRegistroById, 
+    createRegistro, 
+    updateRegistro, 
+    deleteRegistro, 
+    getTaraByIdCamion, 
+    getRegistroByUsuario, 
+    RegistrarAperturarB1,
+    getRegistroByIdCamion };

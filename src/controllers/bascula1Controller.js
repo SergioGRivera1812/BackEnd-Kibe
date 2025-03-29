@@ -22,6 +22,29 @@ const bascula1Controller = {
         }
     },
 
+    //agrega a b2
+    getRegistroByIdCamion: async (req, res) => {
+        try {
+            // Intentamos obtener el registro del camión
+            const registro = await bascula1Model.getRegistroByIdCamion(req.params.idCamion);
+            
+            // Log para ver el registro que se trajo
+            console.log('Registro obtenido:', registro);  // Esto te permitirá ver el registro en la consola
+            
+            // Si no se encuentra el registro, se devuelve un error 404
+            if (!registro) {
+                return res.status(404).json({ error: 'Registro no encontrado' });
+            }
+            
+            // Si el registro se encuentra, lo devolvemos como respuesta
+            res.json(registro);
+        } catch (error) {
+            // En caso de error, se maneja con un error 500
+            res.status(500).json({ error: 'Error al obtener el registro de la bascula 1' });
+        }
+    },
+
+
     createRegistro: async (req, res) => {
         try {
             const registro = await bascula1Model.createRegistro(req.body);
