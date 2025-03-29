@@ -15,7 +15,7 @@ function iniciarPLC() {
   // Manejo de datos recibidos
   parser.on('data', (data) => {
     console.log(`Datos recibidos del PLC: ${data}`);
-    io.emit('serial-data', data);
+    enviarDatosAlFront(data);
   });
 
   // WebSocket para comunicación con los clientes
@@ -37,6 +37,11 @@ function iniciarPLC() {
       console.log('Cliente desconectado');
     });
   });
+}
+
+// Función para enviar los datos recibidos del PLC al frontend
+function enviarDatosAlFront(data) {
+  io.emit('serial-data', data);
 }
 
 // Función para actualizar los valores de la cadena

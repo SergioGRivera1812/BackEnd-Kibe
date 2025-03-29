@@ -98,7 +98,7 @@ const getTaraByIdCamion = async (idCamion) => {
             ) AS combined
             ORDER BY id DESC
             LIMIT 1;
-                `,  
+                `,
             [idCamion, idCamion]
         );
         console.log(rows); // Añadir para verificar los resultados
@@ -114,4 +114,19 @@ const getTaraByIdCamion = async (idCamion) => {
     }
 };
 
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro, getTaraByIdCamion, getRegistroByUsuario };
+const RegistrarAperturarB1 = async () => {
+    try {
+        const { apertura,Peso,modoAp,nombre } = registro;
+
+        const [result] = await pool.execute(
+            `INSERT INTO aperturabascula1 (apertura,Peso,modoAp,nombre) 
+             VALUES (?, ?,?, ?)`,
+            [apertura,Peso,modoAp,nombre]
+        );
+
+        return result;
+    } catch (error) {
+        throw new Error('Error al crear el registro: ' + error.message);
+    }
+}
+module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro, getTaraByIdCamion, getRegistroByUsuario, RegistrarAperturarB1 };

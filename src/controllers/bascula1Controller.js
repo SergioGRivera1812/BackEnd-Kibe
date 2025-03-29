@@ -117,6 +117,15 @@ const bascula1Controller = {
         } catch (error) {
             res.status(500).json({ error: 'Error al obtener el registro', details: error.message });
         }
+    },
+
+    RegistrarAperturarB1: async (req, res) => {
+        try {
+            const registro = await bascula1Model.RegistrarAperturarB1(req.body);
+            res.status(201).json({ message: 'Registro creado', id: registro.insertId });
+        } catch (error) {
+            res.status(500).json({ error: 'Error al crear el registro de apertura de la bascula 1', details: error.message });
+        }
     }
 };
 

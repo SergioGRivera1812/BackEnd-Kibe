@@ -1,6 +1,6 @@
 const bascula2Model = require('../models/registroBascula2.model');
 
-const bascula1Controller = {
+const bascula2Controller = {
     getAllRegistros: async (req, res) => {
         try {
             const registros = await bascula2Model.getAllRegistros();
@@ -87,7 +87,15 @@ const bascula1Controller = {
         } catch (error) {        
             res.status(500).json({ error: 'Error al eliminar el registro de la bascula 2' });
         }
-    }
+    },
+     RegistrarAperturarB2: async (req, res) => {
+            try {
+                const registro = await bascula1Model.RegistrarAperturarB2(req.body);
+                res.status(201).json({ message: 'Registro creado', id: registro.insertId });
+            } catch (error) {
+                res.status(500).json({ error: 'Error al crear el registro de apertura de la bascula 2', details: error.message });
+            }
+        }
 };
 
-module.exports = bascula1Controller;
+module.exports = bascula2Controller;

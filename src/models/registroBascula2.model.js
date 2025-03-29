@@ -102,5 +102,20 @@ const getTaraByIdCamion = async (idCamion) => {
         throw new Error('Error al obtener el valor de tara: ' + error.message);
     }
 };
+const RegistrarAperturarB2 = async () => {
+    try {
+        const { apertura,Peso,modoAp,nombre } = registro;
 
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion };
+        const [result] = await pool.execute(
+            `INSERT INTO aperturabascula2 (apertura,Peso,modoAp,nombre) 
+             VALUES (?, ?,?, ?)`,
+            [apertura,Peso,modoAp,nombre]
+        );
+
+        return result;
+    } catch (error) {
+        throw new Error('Error al crear el registro: ' + error.message);
+    }
+}
+
+module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,RegistrarAperturarB2 };

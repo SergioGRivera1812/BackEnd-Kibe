@@ -9,5 +9,6 @@ router.post('/', bascula2Controller.createRegistro);
 router.put('/:idCamion', bascula2Controller.updateRegistro);
 router.delete('/:id', bascula2Controller.deleteRegistro);
 router.get('/tara/:idCamion', bascula2Controller.getTaraByIdCamion);
+router.get('/aperturaB2', bascula2Controller.RegistrarAperturarB2);
 
 module.exports = router;
