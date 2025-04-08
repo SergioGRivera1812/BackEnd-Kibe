@@ -1,73 +1,52 @@
 const pool = require('../config/db');
 
-const getAllRegistros = async () => {
+const getAllRegistrosForaneos = async () => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM bascula1');
+        const [rows] = await pool.execute('SELECT * FROM bascula2Foraneos');
         return rows;
     } catch (error) {
         throw new Error('Error al obtener los registros: ' + error.message);
     }
 };
 
-const getRegistroById = async (id) => {
+const getRegistroByIdForaneos = async (id) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM bascula1 WHERE id = ?', [id]);
+        const [rows] = await pool.execute('SELECT * FROM bascula2Foraneos WHERE id = ?', [id]);
         return rows[0];
     } catch (error) {
         throw new Error('Error al obtener el registro: ' + error.message);
     }
 };
-const getRegistroByIdCamion = async (idCamion) => {
+const getRegistroByIdCamionForaneos = async (idCamion) => {
     try {
+        // Suponiendo que 'id' es un campo autoincremental que indica el orden de registro
         const [rows] = await pool.execute(
-            `SELECT 'bascula1' AS tabla, fechaE 
-             FROM bascula1 WHERE idCamion = ? 
-             UNION ALL
-             SELECT 'bascula2' AS tabla, fechaE 
-             FROM bascula2 WHERE idCamion = ?
-             ORDER BY fechaE DESC
-             LIMIT 1`, 
-            [idCamion, idCamion]
-        );
-
-        if (rows.length === 0) {
-            throw new Error('Camión no encontrado en ninguna báscula');
-        }
-
-        const tabla = rows[0].tabla;
-
-        const [result] = await pool.execute(
-            `SELECT * FROM ${tabla} WHERE idCamion = ?`, 
+            'SELECT * FROM bascula2Foraneos WHERE idCamion = ? ORDER BY id DESC LIMIT 1',
             [idCamion]
         );
-
-        if (result.length === 0) {
-            throw new Error(`No se encontró ningún registro en ${tabla}`);
+        if (rows.length === 0) {
+            return null; // Si no hay registros, retornamos null
         }
-
-        console.log(`Registro obtenido correctamente de ${tabla}`);
-        return result;
+        return rows[0]; // Retornamos solo el primer registro (el más reciente)
     } catch (error) {
-        throw new Error('Error al obtener el registro: ' + error.message);
+        throw new Error('Error al ejecutar la consulta SQL: ' + error.message);
+    }
+};
+const getRegistroByUsuarioForaneos = async (usuario) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM bascula2Foraneos WHERE conductor = ?', [usuario]);
+        return rows[0];
+    } catch (error) {
+        throw new Error('Error al obtener el registro por usuario: ' + error.message);
     }
 };
 
- const getRegistroByUsuario = async (usuario) => {
-     try {
-         const [rows] = await pool.execute('SELECT * FROM bascula1 WHERE conductor = ?', [usuario]);
-         return rows[0];
-     } catch (error) {
-         throw new Error('Error al obtener el registro por usuario: ' + error.message);
-     }
- };
-
-
-const createRegistro = async (registro) => {
+const createRegistroForaneos = async (registro) => {
     try {
         const { idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, Entro, Salio, activo } = registro;
 
         const [result] = await pool.execute(
-            `INSERT INTO bascula1 (idCamion,placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio,activo) 
+            `INSERT INTO bascula2Foraneos (idCamion,placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador,Entro,Salio,activo) 
              VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
             [idCamion, placas, conductor, producto, cliente, origen, destino, tara, bruto, neto, fechaE, horaE, fechaS, horaS, operador, Entro, Salio, activo]
         );
@@ -78,15 +57,15 @@ const createRegistro = async (registro) => {
     }
 };
 
-const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activo) => {
+const updateRegistroForaneos = async (idCamion, bruto, neto, fechaS, horaS, salio, activo) => {
     try {
         // Determinar la tabla y el registro más reciente
         const [rows] = await pool.execute(
-            `SELECT 'bascula1' AS tabla, fechaE 
-             FROM bascula1 WHERE idCamion = ? 
+            `SELECT 'bascula1Foraneos' AS tabla, fechaE 
+             FROM bascula1Foraneos WHERE idCamion = ? 
              UNION ALL
-             SELECT 'bascula2' AS tabla, fechaE 
-             FROM bascula2 WHERE idCamion = ?
+             SELECT 'bascula2Foraneos' AS tabla, fechaE 
+             FROM bascula2Foraneos WHERE idCamion = ?
              ORDER BY fechaE DESC
              LIMIT 1`, 
             [idCamion, idCamion]
@@ -119,23 +98,23 @@ const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activ
 
 
 
-const deleteRegistro = async (id) => {
+const deleteRegistroForaneos = async (id) => {
     try {
-        const result = await pool.execute('DELETE FROM bascula1 WHERE id = ?', [id]);
+        const result = await pool.execute('DELETE FROM bascula2Foraneos WHERE id = ?', [id]);
         return result;
     } catch (error) {
         throw new Error('Error al eliminar el usuario: ' + error.message);
     }
 };
 
-const getTaraByIdCamion = async (idCamion) => {
+const getTaraByIdCamionForaneos = async (idCamion) => {
     try {
         const [rows] = await pool.execute(
             `SELECT tara
             FROM (
-                SELECT tara, id FROM bascula1 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+                SELECT tara, id FROM bascula1Foraneos WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
                 UNION ALL
-                SELECT tara, id FROM bascula2 WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
+                SELECT tara, id FROM bascula2Foraneos WHERE idCamion = ? AND tara IS NOT NULL AND tara != ''
             ) AS combined
             ORDER BY id DESC
             LIMIT 1;
@@ -171,12 +150,12 @@ const RegistrarAperturarB1 = async () => {
     }
 }
 module.exports = { 
-    getAllRegistros, 
-    getRegistroById, 
-    createRegistro, 
-    updateRegistro, 
-    deleteRegistro, 
-    getTaraByIdCamion, 
-    getRegistroByUsuario, 
+    getAllRegistrosForaneos, 
+    getRegistroByIdForaneos, 
+    createRegistroForaneos, 
+    updateRegistroForaneos, 
+    deleteRegistroForaneos, 
+    getTaraByIdCamionForaneos, 
+    getRegistroByUsuarioForaneos, 
     RegistrarAperturarB1,
-    getRegistroByIdCamion };
+    getRegistroByIdCamionForaneos };

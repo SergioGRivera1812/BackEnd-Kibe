@@ -17,6 +17,41 @@ const getRegistroById = async (id) => {
         throw new Error('Error al obtener el registro: ' + error.message);
     }
 };
+const getRegistroByIdCamion = async (idCamion) => {
+    try {
+        const [rows] = await pool.execute(
+            `SELECT 'bascula1' AS tabla, fechaE 
+             FROM bascula1 WHERE idCamion = ? 
+             UNION ALL
+             SELECT 'bascula2' AS tabla, fechaE 
+             FROM bascula2 WHERE idCamion = ?
+             ORDER BY fechaE DESC
+             LIMIT 1`, 
+            [idCamion, idCamion]
+        );
+
+        if (rows.length === 0) {
+            throw new Error('Camión no encontrado en ninguna báscula');
+        }
+
+        const tabla = rows[0].tabla;
+
+        const [result] = await pool.execute(
+            `SELECT * FROM ${tabla} WHERE idCamion = ?`, 
+            [idCamion]
+        );
+
+        if (result.length === 0) {
+            throw new Error(`No se encontró ningún registro en ${tabla}`);
+        }
+
+        console.log(`Registro obtenido correctamente de ${tabla}`);
+        return result;
+    } catch (error) {
+        throw new Error('Error al obtener el registro: ' + error.message);
+    }
+};
+
 
 const createRegistro = async (registro) => {
     try {
@@ -35,11 +70,14 @@ const createRegistro = async (registro) => {
 };
 const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activo) => {
     try {
-        // Determinar en qué tabla está registrado el camión
+        // Determinar la tabla y el registro más reciente
         const [rows] = await pool.execute(
-            `SELECT 'bascula1' AS tabla FROM bascula1 WHERE idCamion = ?
+            `SELECT 'bascula1' AS tabla, fechaE 
+             FROM bascula1 WHERE idCamion = ? 
              UNION ALL
-             SELECT 'bascula2' AS tabla FROM bascula2 WHERE idCamion = ?
+             SELECT 'bascula2' AS tabla, fechaE 
+             FROM bascula2 WHERE idCamion = ?
+             ORDER BY fechaE DESC
              LIMIT 1`, 
             [idCamion, idCamion]
         );
@@ -48,12 +86,12 @@ const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activ
             throw new Error('Camión no encontrado en ninguna báscula');
         }
 
-        const tabla = rows[0].tabla; // Obtener la tabla correspondiente
+        const tabla = rows[0].tabla;  // Obtener la tabla con el registro más reciente
 
         // Ejecutar el UPDATE en la tabla correcta
         const [result] = await pool.execute(
             `UPDATE ${tabla} 
-            SET bruto = ?, neto = ?, fechaS = ?, horaS = ?, salio = ?, activo = ?
+            SET bruto = ?, neto = ?, fechaS = ?, horaS = ?, salio = ?, activo = ? 
             WHERE idCamion = ?`, 
             [bruto, neto, fechaS, horaS, salio, activo, idCamion]
         );
@@ -62,11 +100,13 @@ const updateRegistro = async (idCamion, bruto, neto, fechaS, horaS, salio, activ
             throw new Error(`No se pudo actualizar el registro en ${tabla}`);
         }
 
+        console.log(`Registro actualizado correctamente en ${tabla}`);
         return `Registro actualizado correctamente en ${tabla}`;
     } catch (error) {
         throw new Error('Error al actualizar el registro: ' + error.message);
     }
 };
+
 
 
 const deleteRegistro = async (id) => {
@@ -118,4 +158,4 @@ const RegistrarAperturarB2 = async () => {
     }
 }
 
-module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,RegistrarAperturarB2 };
+module.exports = { getAllRegistros, getRegistroById, createRegistro, updateRegistro, deleteRegistro,getTaraByIdCamion,RegistrarAperturarB2,getRegistroByIdCamion };

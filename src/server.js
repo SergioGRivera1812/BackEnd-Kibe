@@ -6,6 +6,8 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bascula1Routes = require("./routes/bascula1Routes");
+const bascula1ForaneosRoutes = require("./routes/bascula1ForaneosRoutes");
+const bascula2ForaneosRoutes = require("./routes/bascula2ForaneosRoutes");
 const bascula2Routes = require("./routes/bascula2Routes");
 const camionRoutes = require("./routes/camionRoutes");
 const printerRoutes = require("./routes/printerRoutes"); 
@@ -28,6 +30,8 @@ app.use(cors());
 app.use("/auth", authRoutes);
 
 app.use("/users", verifyToken, userRoutes);
+app.use("/bascula1Foraneos", verifyToken, bascula1ForaneosRoutes);
+app.use("/bascula2Foraneos", verifyToken, bascula2ForaneosRoutes);
 app.use("/bascula2", verifyToken, bascula2Routes);
 app.use("/bascula1", verifyToken, bascula1Routes);
 app.use("/camion", verifyToken, camionRoutes);
